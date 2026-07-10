@@ -2,7 +2,9 @@
 
 // a semi-endless road game with inspiration from slowroads.
 
-// has support soundcloud music (copy and paste some if you dont like the preset playlist). control with wasd or the arrow keys on desktop; support is present for mobile as well.
+// has support for soundcloud music. just paste a song in - works with playlists too. 
+
+// control with wasd or the arrow keys on desktop; support is present for mobile as well.
 
 // if you're american, the km/h can be swapped by pressing on the dist. or speedometer part of the ui.
 
