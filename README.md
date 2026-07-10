@@ -1,4 +1,4 @@
-// [lowpoly drive](https://blended-up.github.io).
+// [lowpoly drive](https://lowpolydrive.github.io).
 
 // a semi-endless road game with inspiration from slowroads.
 
