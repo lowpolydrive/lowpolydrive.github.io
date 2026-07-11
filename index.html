@@ -143,7 +143,7 @@
     transition: background 0.15s ease, transform 0.05s ease, color 0.15s ease;
   }
   .btn:hover { background: rgba(255,255,255,0.16); }
-  .btn:active { transform: translateY(1px); }
+  .btn:active { transform: translateY(1px); background: var(--accent); color: #10141a; border-color: transparent; }
   .btn.on { color: var(--accent); border-color: rgba(127,176,196,0.55); }
   .btn.locked { opacity: 0.35; pointer-events: none; }
   .btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none;
@@ -306,6 +306,23 @@
     body.wave .pod-controls {
       top: calc(58px + env(safe-area-inset-top));
     }
+    /* stronger contrast on mobile so the ui reads over bright scenes */
+    .btn {
+      background: rgba(18, 20, 26, 0.82);
+      border-color: rgba(255,255,255,0.28);
+      color: #f2f4f8;
+    }
+    .pod {
+      background: rgba(18, 20, 26, 0.82);
+      border-color: rgba(255,255,255,0.24);
+    }
+    body.wave .btn { background: rgba(16, 6, 32, 0.82); border-color: rgba(33,230,255,0.55); }
+    body.wave .pod { background: rgba(16, 6, 32, 0.82); border-color: rgba(255,47,176,0.6); }
+    /* clear tap feedback */
+    .btn:hover { background: rgba(18, 20, 26, 0.82); }
+    .btn:active { background: var(--accent); color: #10141a; border-color: transparent; }
+    body.wave .btn:hover { background: rgba(16, 6, 32, 0.82); }
+    body.wave .btn:active { background: #21e6ff; color: #0a0618; border-color: transparent; }
   }
 
   /* finish card */
@@ -478,6 +495,10 @@
     color: #ffd0ee;
   }
   body.wave .steer-btn.down, body.wave .pedal.gas.down { background: rgba(33,230,255,0.35); }
+  body.wave #volSlider { background: rgba(255,47,176,0.28); }
+  body.wave #volSlider::-webkit-slider-thumb { background: #21e6ff; box-shadow: 0 0 8px rgba(33,230,255,0.7); }
+  body.wave #volSlider::-moz-range-thumb { background: #21e6ff; box-shadow: 0 0 8px rgba(33,230,255,0.7); }
+  body.wave #volPop { border-color: rgba(255,47,176,0.4); }
   body.wave .wheel {
     background: rgba(20, 8, 38, 0.5);
     border-color: rgba(255, 47, 176, 0.4);
