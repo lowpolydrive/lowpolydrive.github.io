@@ -149,6 +149,33 @@
   .btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none;
     stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .touchOnly { display: none; }
+
+  /* tooltips */
+  [data-tip]:not(.pod) { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: 5px 9px;
+    background: rgba(20, 22, 28, 0.94);
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.1);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.14s ease, transform 0.14s ease;
+    z-index: 30;
+  }
+  [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  [data-tip-below]::after { bottom: auto; top: calc(100% + 8px); transform: translateX(-50%) translateY(-4px); }
+  [data-tip-below]:hover::after { transform: translateX(-50%) translateY(0); }
+  body.wave [data-tip]::after { background: rgba(20, 8, 38, 0.94); border-color: rgba(255,47,176,0.4); }
+  @media (hover: none) { [data-tip]::after { display: none; } }
   .ctrl-toggle {
     width: auto !important;
     padding: 0 12px;
@@ -590,49 +617,49 @@
 
 <div class="cluster">
   <div class="pod wave-badge" id="waveBadge">wave mode</div>
-  <div class="pod pod-speed speed unit-toggle" id="speedBlock" title="Tap to switch units">
+  <div class="pod pod-speed speed unit-toggle" id="speedBlock" data-tip="tap to switch units" data-tip-below>
     <div class="row">
       <span class="value" id="spd">0</span>
       <span class="unit" id="spdUnit">km/h</span>
     </div>
     <div class="bar"><div class="fill" id="spdFill"></div></div>
   </div>
-  <div class="pod pod-dist dist unit-toggle" id="distBlock" title="Tap to switch units">
+  <div class="pod pod-dist dist unit-toggle" id="distBlock" data-tip="tap to switch units" data-tip-below>
     <div class="label">dist</div>
     <div class="value" id="dist">0.00 km</div>
   </div>
   <div class="pod-controls controls">
-    <button class="btn ctrl-toggle touchOnly on" id="ctrlBtn" aria-label="Switch to button steering">
+    <button class="btn ctrl-toggle touchOnly on" id="ctrlBtn" aria-label="switch to button steering" data-tip="steering">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 10V5M10.3 13l-4.3 2.5M13.7 13l4.3 2.5"/></svg>
       <span>wheel</span>
     </button>
-    <button class="btn" id="hillBtn" aria-label="Toggle hills">
+    <button class="btn" id="hillBtn" aria-label="toggle hills" data-tip="hills">
       <svg viewBox="0 0 24 24"><path d="M3 18l5-7 4 5 3-4 6 6"/></svg>
     </button>
     <div class="audio-wrap" id="audioWrap">
-      <button class="btn" id="audioBtn" aria-label="Toggle sound">
+      <button class="btn" id="audioBtn" aria-label="toggle sound" data-tip="sound">
         <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
       </button>
       <div class="vol-pop" id="volPop">
-        <input type="range" id="volSlider" min="0" max="100" value="60" aria-label="Volume" orient="vertical">
+        <input type="range" id="volSlider" min="0" max="100" value="60" aria-label="volume" orient="vertical">
       </div>
     </div>
-    <button class="btn" id="camBtn" aria-label="Change camera">
+    <button class="btn" id="camBtn" aria-label="change camera" data-tip="camera">
       <svg viewBox="0 0 24 24"><rect x="2" y="7" width="14" height="10" rx="2"/><path d="M16 11l6-3v8l-6-3"/></svg>
     </button>
-    <button class="btn" id="themeBtn" aria-label="Change environment">
+    <button class="btn" id="themeBtn" aria-label="change environment" data-tip="theme">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
     </button>
-    <button class="btn wave-toggle" id="waveBtn" aria-label="Toggle wave mode">
+    <button class="btn wave-toggle" id="waveBtn" aria-label="toggle wave mode" data-tip="wave mode">
       <svg viewBox="0 0 24 24"><path d="M2 13c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/><path d="M2 18c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/></svg>
     </button>
-    <button class="btn auto-btn" id="autoBtn" aria-label="Toggle auto-drive">
+    <button class="btn auto-btn" id="autoBtn" aria-label="toggle auto-drive" data-tip="auto-drive">
       <svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11M5 11h14v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="14" r="0.6"/><circle cx="16.5" cy="14" r="0.6"/></svg>
     </button>
-    <button class="btn" id="musicBtn" aria-label="Music player">
+    <button class="btn" id="musicBtn" aria-label="music player" data-tip="music">
       <svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
     </button>
-    <button class="btn touchOnly" id="fsBtn" aria-label="Fullscreen">
+    <button class="btn touchOnly" id="fsBtn" aria-label="fullscreen" data-tip="fullscreen">
       <svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
     </button>
   </div>
@@ -641,14 +668,14 @@
 <div id="musicPanel" aria-hidden="true">
   <div class="mp-header">
     <span class="mp-title-label">music</span>
-    <button class="mp-close" id="mpClose" aria-label="Close music player">
+    <button class="mp-close" id="mpClose" aria-label="close music player">
       <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
   <div class="mp-now">
     <div class="mp-nowplaying" id="mpNow">nothing playing</div>
     <div class="mp-progress">
-      <input type="range" id="mpSeek" min="0" max="1000" value="0" step="1" aria-label="Seek">
+      <input type="range" id="mpSeek" min="0" max="1000" value="0" step="1" aria-label="seek">
       <div class="mp-times"><span id="mpCur">0:00</span><span id="mpDur">0:00</span></div>
     </div>
     <div class="mp-transport">
@@ -658,7 +685,7 @@
     </div>
     <div class="mp-vol">
       <svg viewBox="0 0 24 24" class="mp-volicon"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
-      <input type="range" id="mpVol" min="0" max="100" value="70" aria-label="Music volume">
+      <input type="range" id="mpVol" min="0" max="100" value="70" aria-label="music volume">
     </div>
   </div>
   <div class="mp-add">
@@ -671,24 +698,24 @@
 <div id="ytHost"></div>
 
 <div class="touch">
-  <div class="wheel" id="wheel" aria-label="Steering wheel">
+  <div class="wheel" id="wheel" aria-label="steering wheel">
     <div class="wheel-inner" id="wheelInner">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><circle cx="12" cy="12" r="2.4"/><path d="M12 9.6V3M9.7 14l-5.8 3.3M14.3 14l5.8 3.3"/></svg>
     </div>
   </div>
   <div class="steer-buttons" id="steerButtons" style="display:none;">
-    <button class="steer-btn" id="steerLeft" aria-label="Steer left">
+    <button class="steer-btn" id="steerLeft" aria-label="steer left">
       <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
     </button>
-    <button class="steer-btn" id="steerRight" aria-label="Steer right">
+    <button class="steer-btn" id="steerRight" aria-label="steer right">
       <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
     </button>
   </div>
   <div class="pedals">
-    <button class="pedal gas" id="gasPedal" aria-label="Accelerate">
+    <button class="pedal gas" id="gasPedal" aria-label="accelerate">
       <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>
     </button>
-    <button class="pedal brake" id="brakePedal" aria-label="Brake">
+    <button class="pedal brake" id="brakePedal" aria-label="brake">
       <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </button>
   </div>
