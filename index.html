@@ -10,7 +10,7 @@
 <title>lowpoly drive</title>
 <script>
   // bump on publish
-  window.__BUILD = '1';
+  window.__BUILD = '0.1.1';
   (function () {
     try {
       fetch('version.txt?ts=' + Date.now(), { cache: 'no-store' })
@@ -64,16 +64,22 @@
 
   /* hud pods */
   /* idle fade */
-  .cluster, .touch, .pod-controls, #musicBtn {
-    transition: opacity 0.8s ease;
+  .cluster, .touch, .pod-controls, #musicPanel {
+    transition: opacity 0.8s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity;
   }
   body.idle-hide .cluster,
   body.idle-hide .touch,
-  body.idle-hide .pod-controls {
+  body.idle-hide .pod-controls,
+  body.idle-hide #musicPanel {
     opacity: 0;
     pointer-events: none;
   }
   body.idle-hide .wave-badge { opacity: 0; }
+  /* disable blur during idle fade */
+  body.fading .pod, body.fading .wheel, body.fading .pedal, body.fading .steer-btn, body.fading #musicPanel {
+    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  }
 
   .cluster {
     position: fixed;
@@ -326,14 +332,14 @@
     .pod-controls {
       top: calc(14px + env(safe-area-inset-top));
       bottom: auto;
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
+      right: calc(12px + env(safe-area-inset-right));
+      left: auto;
+      transform: none;
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-end;
       gap: 7px;
-      max-width: calc(100vw - 24px);
+      max-width: 47vw;
     }
     .pod-controls .btn { width: 40px; height: 40px; }
     .pod-controls .ctrl-toggle { width: 40px !important; padding: 0; }
@@ -342,7 +348,7 @@
     body.wave .pod-controls {
       top: calc(58px + env(safe-area-inset-top));
     }
-    /* stronger contrast on mobile so the ui reads over bright scenes */
+    /* mobile contrast (forgot to shorten this comment) */
     .btn {
       background: rgba(18, 20, 26, 0.82);
       border-color: rgba(255,255,255,0.28);
@@ -554,6 +560,8 @@
     border-radius: 20px;
     text-shadow: 0 0 10px rgba(33,230,255,0.6);
     box-shadow: 0 0 16px rgba(255,47,176,0.2);
+    transition: opacity 0.8s ease;
+    will-change: opacity;
   }
   body.wave .wave-badge { display: block; }
   .wave-toggle { color: #ff2fb0; border-color: rgba(255,47,176,0.5); }
@@ -579,7 +587,8 @@
     border-radius: 0 16px 16px 0;
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+    will-change: opacity;
     color: var(--text);
   }
   #musicPanel.open { transform: translate(0, -50%); }
@@ -604,6 +613,8 @@
     color: var(--text); border-radius: 9px; cursor: pointer; transition: background 0.15s ease;
   }
   .mp-pill:hover { background: rgba(255,255,255,0.16); }
+  .mp-pill.on { background: var(--accent); color: #10141a; border-color: transparent; }
+  body.wave .mp-pill.on { background: #21e6ff; color: #0a0618; }
   .mp-pill-main { background: var(--accent); color: #10141a; border-color: transparent; }
   .mp-pill-main:hover { background: var(--accent); filter: brightness(1.1); }
   body.wave .mp-pill-main { background: #21e6ff; color: #0a0618; }
@@ -681,17 +692,22 @@
     </div>
     <div class="bar"><div class="fill" id="spdFill"></div></div>
   </div>
-  <div class="pod pod-dist dist unit-toggle" id="distBlock" data-tip="tap to switch units" data-tip-below>
-    <div class="label">dist</div>
-    <div class="value" id="dist">0.00 km</div>
-  </div>
   <div class="pod-controls controls">
-    <button class="btn ctrl-toggle touchOnly on" id="ctrlBtn" aria-label="switch to button steering" data-tip="steering">
+    <button class="btn ctrl-toggle touchOnly" id="ctrlBtn" aria-label="switch to wheel steering" data-tip="steering">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 10V5M10.3 13l-4.3 2.5M13.7 13l4.3 2.5"/></svg>
-      <span>wheel</span>
+      <span>buttons</span>
+    </button>
+    <button class="btn" id="camBtn" aria-label="change camera" data-tip="camera">
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="14" height="10" rx="2"/><path d="M16 11l6-3v8l-6-3"/></svg>
     </button>
     <button class="btn" id="hillBtn" aria-label="toggle hills" data-tip="hills">
       <svg viewBox="0 0 24 24"><path d="M3 18l5-7 4 5 3-4 6 6"/></svg>
+    </button>
+    <button class="btn" id="themeBtn" aria-label="change environment" data-tip="theme">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+    </button>
+    <button class="btn wave-toggle" id="waveBtn" aria-label="toggle wave mode" data-tip="wave mode">
+      <svg viewBox="0 0 24 24"><path d="M2 13c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/><path d="M2 18c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/></svg>
     </button>
     <div class="audio-wrap" id="audioWrap">
       <button class="btn" id="audioBtn" aria-label="toggle sound" data-tip="sound">
@@ -701,22 +717,13 @@
         <input type="range" id="volSlider" min="0" max="100" value="60" aria-label="volume" orient="vertical">
       </div>
     </div>
-    <button class="btn" id="camBtn" aria-label="change camera" data-tip="camera">
-      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="14" height="10" rx="2"/><path d="M16 11l6-3v8l-6-3"/></svg>
-    </button>
-    <button class="btn" id="themeBtn" aria-label="change environment" data-tip="theme">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
-    </button>
-    <button class="btn wave-toggle" id="waveBtn" aria-label="toggle wave mode" data-tip="wave mode">
-      <svg viewBox="0 0 24 24"><path d="M2 13c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/><path d="M2 18c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/></svg>
+    <button class="btn" id="musicBtn" aria-label="music player" data-tip="music">
+      <svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
     </button>
     <button class="btn auto-btn" id="autoBtn" aria-label="toggle auto-drive" data-tip="auto-drive">
       <svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11M5 11h14v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="14" r="0.6"/><circle cx="16.5" cy="14" r="0.6"/></svg>
     </button>
-    <button class="btn" id="musicBtn" aria-label="music player" data-tip="music">
-      <svg viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
-    </button>
-    <button class="btn touchOnly" id="fsBtn" aria-label="fullscreen" data-tip="fullscreen">
+    <button class="btn" id="fsBtn" aria-label="fullscreen" data-tip="fullscreen">
       <svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
     </button>
   </div>
@@ -739,6 +746,7 @@
       <button class="mp-pill" id="mpPrev">prev</button>
       <button class="mp-pill mp-pill-main" id="mpPlay"><span id="mpPlayIcon">play</span></button>
       <button class="mp-pill" id="mpNext">next</button>
+      <button class="mp-pill" id="mpLoop" aria-label="loop">loop</button>
     </div>
     <div class="mp-vol">
       <svg viewBox="0 0 24 24" class="mp-volicon"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>
@@ -849,7 +857,7 @@ scene.fog = new THREE.Fog(C.fog, C.fogNear, C.fogFar);
 
 const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 700);
 
-const renderer = new THREE.WebGLRenderer({ antialias: false });
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
 function renderSize() {
   const scale = Math.min(innerWidth, innerHeight) < 560 ? 1.6 : 3.2;
   return [Math.floor(innerWidth / scale), Math.floor(innerHeight / scale)];
@@ -1015,8 +1023,8 @@ function applyWave(t) {
     if (rm.emissive) { rm.emissive.setHex(on ? 0x7fe8ff : 0x000000); rm.emissiveIntensity = on ? 1.0 : 1; }
     rm.color.setHex(on ? 0xffffff : ((rm.userData.pKey && THEMES[themeName][rm.userData.pKey]) || 0x3a3e47));
     rm.needsUpdate = true;
-    for (const e of seg.edges) e.visible = !on && e.visible;
-    for (const d of seg.dashes) d.visible = !on && d.visible;
+    for (const e of seg.edges) e.visible = !on;
+    for (const d of seg.dashes) d.visible = !on;
   }
   for (const mt of mountains) {
     if (mt.userData.outline) mt.userData.outline.visible = on;
@@ -1174,45 +1182,52 @@ function makeSegment(i) {
   }
 
   scene.add(g);
-  return { group: g, z: 0, ground, road, edges, dashes };
+  return { group: g, z: 0, ground, road, edges, dashes, warpList: [ground, road, ...edges] };
+}
+
+const _cz = new Float32Array(64), _ch = new Float32Array(64), _cy = new Float32Array(64);
+function warpMeshFast(mesh, originZ, yLift) {
+  const pos = mesh.geometry.attributes.position;
+  const baseX = mesh.userData.baseX;
+  const arr = pos.array;
+  const n = pos.count;
+  let rows = 0;
+  for (let i = 0; i < n; i++) {
+    const ly = arr[i*3 + 1];
+    let r = -1;
+    for (let k = 0; k < rows; k++) if (_cy[k] === ly) { r = k; break; }
+    if (r < 0) { r = rows++; _cy[r] = ly; const wz = originZ - ly; _cz[r] = curveAt(wz); _ch[r] = hillAt(wz) + yLift; }
+    arr[i*3] = baseX[i] + _cz[r];
+    arr[i*3 + 2] = _ch[r];
+  }
+  pos.needsUpdate = true;
 }
 
 function warpSegment(seg) {
   const originZ = seg.group.position.z;
-  function warpMesh(mesh, yLift) {
-    const pos = mesh.geometry.attributes.position;
-    for (let i=0;i<pos.count;i++){
-      const ly = pos.getY(i);
-      const worldZ = originZ - ly;
-      pos.setX(i, mesh.userData.baseX[i] + curveAt(worldZ));
-      pos.setZ(i, hillAt(worldZ) + yLift);
-    }
-    pos.needsUpdate = true;
-  }
-  for (const m of [seg.ground, seg.road, ...seg.edges]) {
-    if (!m.userData.baseX) {
+  if (!seg.ground.userData.baseX) {
+    for (const m of seg.warpList) {
       const p = m.geometry.attributes.position;
-      m.userData.baseX = Array.from({length:p.count}, (_,i)=>p.getX(i));
+      const bx = new Float32Array(p.count);
+      for (let i = 0; i < p.count; i++) bx[i] = p.array[i*3];
+      m.userData.baseX = bx;
+    }
+    for (const e of seg.edges) {
+      const bx = e.userData.baseX;
+      for (let i = 0; i < bx.length; i++) bx[i] += e.userData.sx;
     }
   }
-  warpMesh(seg.ground, 0);
-  warpMesh(seg.road, 0.02);
-  seg.edges.forEach(e => {
-    if (!e.userData.shifted) {
-      const p = e.geometry.attributes.position;
-      for (let i=0;i<p.count;i++) e.userData.baseX[i] += e.userData.sx;
-      e.userData.shifted = true;
-    }
-    warpMesh(e, 0.03);
-  });
-  seg.dashes.forEach(dash => {
+  warpMeshFast(seg.ground, originZ, 0);
+  warpMeshFast(seg.road, originZ, 0.02);
+  for (const e of seg.edges) warpMeshFast(e, originZ, 0.03);
+  for (const dash of seg.dashes) {
     const worldZ = originZ + dash.userData.localZ;
     dash.position.set(curveAt(worldZ), hillAt(worldZ) + 0.06, dash.userData.localZ);
     const yaw = Math.atan(curveSlopeAt(worldZ));
     const pitch = Math.atan(hillSlopeAt(worldZ));
     dash.rotation.order = 'YXZ';
     dash.rotation.set(-Math.PI/2 + pitch, 0, -yaw);
-  });
+  }
 }
 
 for (let i = 0; i < VISIBLE; i++) {
@@ -1962,9 +1977,11 @@ const PAUSE_LABEL = 'pause';
 
 const PRESETS = [
   { title: 'vaporwave / chillwave — ultimate', url: 'https://soundcloud.com/melky32/sets/vaporwave-chillwave-ultimate' },
+  { title: 'strawberry guy — taking my time to be', url: 'https://soundcloud.com/strawberryguy/sets/taking-my-time-to-be' },
 ];
 
 let scWidget = null, scReady = false;
+let loopOne = false;
 let queue = PRESETS.map(p => ({ url: p.url, title: p.title }));
 let queueIdx = -1;
 let isPlaying = false;
@@ -2046,7 +2063,13 @@ function loadTrack(trackUrl, title) {
         scWidget.getCurrentSound(s => { if (s && s.title) mpNow.textContent = s.title.toLowerCase(); });
       });
       scWidget.bind(SC.Widget.Events.PAUSE, () => setPlayIcon(false));
-      scWidget.bind(SC.Widget.Events.FINISH, () => playNext());
+      scWidget.bind(SC.Widget.Events.FINISH, () => {
+        if (loopOne && scWidget && scReady) {
+          scWidget.seekTo(0); resetProgressUI(); scWidget.play(); applyVolume();
+        } else {
+          onTrackEnd();
+        }
+      });
       scWidget.bind(SC.Widget.Events.PLAY_PROGRESS, e => {
         if (seeking) return;
         if (trackDuration > 0) {
@@ -2078,6 +2101,19 @@ function playPrev() {
   if (scWidget && scReady) { scWidget.prev(); scWidget.seekTo(0); resetProgressUI(); applyVolume(); return; }
   if (queue.length) playFromQueue((queueIdx - 1 + queue.length) % queue.length);
 }
+function onTrackEnd() {
+  if (queueIdx < queue.length - 1) {
+    playFromQueue(queueIdx + 1);
+  } else {
+    playFromQueue(0);
+  }
+}
+
+const mpLoop = document.getElementById('mpLoop');
+mpLoop.addEventListener('click', () => {
+  loopOne = !loopOne;
+  mpLoop.classList.toggle('on', loopOne);
+});
 
 mpPlay.addEventListener('click', () => {
   if (!scWidget) { playFromQueue(queueIdx >= 0 ? queueIdx : 0); return; }
@@ -2143,11 +2179,17 @@ document.addEventListener('fullscreenchange', () => {
 });
 
 // idle fade
-let idleTimer = null;
+let idleTimer = null, fadeClearTimer = null;
+function markFading() {
+  document.body.classList.add('fading');
+  clearTimeout(fadeClearTimer);
+  fadeClearTimer = setTimeout(() => document.body.classList.remove('fading'), 850);
+}
 function wakeUI() {
+  if (document.body.classList.contains('idle-hide')) markFading();
   document.body.classList.remove('idle-hide');
   clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => document.body.classList.add('idle-hide'), 15000);
+  idleTimer = setTimeout(() => { markFading(); document.body.classList.add('idle-hide'); }, 15000);
 }
 ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'].forEach(ev =>
   window.addEventListener(ev, wakeUI, { passive: true }));
@@ -2163,7 +2205,7 @@ hillBtn.addEventListener('click', () => {
 const ctrlBtn = document.getElementById('ctrlBtn');
 const ctrlLabel = ctrlBtn.querySelector('span');
 const steerButtonsEl = document.getElementById('steerButtons');
-let buttonMode = false;
+let buttonMode = true;
 let btnSteer = 0;
 let btnLeftDown = false, btnRightDown = false;
 
@@ -2203,6 +2245,7 @@ ctrlBtn.addEventListener('click', () => {
     document.getElementById('steerRight').classList.remove('down');
   }
 });
+if (buttonMode) { wheelEl.style.display = 'none'; steerButtonsEl.style.display = 'flex'; }
 
 let useMph = false;
 const spdUnitEl = document.getElementById('spdUnit');
@@ -2211,7 +2254,6 @@ function toggleUnits() {
   spdUnitEl.textContent = useMph ? 'mph' : 'km/h';
 }
 document.getElementById('speedBlock').addEventListener('click', toggleUnits);
-document.getElementById('distBlock').addEventListener('click', toggleUnits);
 
 const finishEl = document.getElementById('finish');
 const finishSubEl = document.getElementById('finishSub');
@@ -2281,7 +2323,7 @@ let doneT = 0;
 const SPEEDO = 0.66;
 
 const spdEl = document.getElementById('spd');
-const distEl = document.getElementById('dist');
+const distEl = null;
 const spdFill = document.getElementById('spdFill');
 
 const camState = { heading: 0, x: curveAt(0), y: 4.2 };
@@ -2345,8 +2387,8 @@ function frame() {
     up = false; down = false;
   }
 
-  // finish reveal
-  if (!waveMode && phase === 'driving' && state.distance > GOAL_DIST - 340) {
+  // finish reveal (disabled)
+  if (false) {
     if (!house.visible) {
       houseZ = state.worldZ - 300;
       flattenZ = houseZ;
@@ -2440,36 +2482,26 @@ function frame() {
   }
   }
 
-  const courtCenterZ = houseZ - 6;
-  const courtRimZ = houseZ + 12;
   for (const seg of segments) {
     seg.group.position.x = 0;
     warpSegment(seg);
-    const frontEdge = seg.group.position.z - SEG_LEN/2;
-    seg.group.visible = true;
-    seg.road.visible = !(house.visible && frontEdge < courtCenterZ);
-    const hideMarks = waveMode || (house.visible && frontEdge < courtRimZ);
-    for (const e of seg.edges) e.visible = !hideMarks;
-    for (const d of seg.dashes) d.visible = !hideMarks;
   }
-  const cullZ = house.visible ? houseZ + 20 : -Infinity;
+  const cullZ = -Infinity;
   for (const tree of trees) {
     if (waveMode) { tree.visible = false; continue; }
     tree.position.x = curveAt(tree.position.z) + tree.userData.offX;
     tree.position.y = hillAt(tree.position.z);
-    tree.visible = tree.position.z > cullZ;
+    tree.visible = true;
   }
   for (const mt of mountains) {
     const mz = mt.position.z;
+    const vis = mz > cullZ;
+    mt.visible = vis;
+    if (!vis) continue;
     mt.position.x = curveAt(mz) + mt.userData.offX;
     const rad = (mt.userData.height || 30) * 0.8;
-    let lowest = hillAt(mz);
-    for (let dz = -rad; dz <= rad; dz += rad/2) {
-      const gh = hillAt(mz + dz);
-      if (gh < lowest) lowest = gh;
-    }
+    const lowest = Math.min(hillAt(mz - rad), hillAt(mz), hillAt(mz + rad));
     mt.position.y = lowest - 1.5;
-    mt.visible = mt.position.z > cullZ;
   }
 
   const roadY = hillAt(state.worldZ);
@@ -2656,13 +2688,10 @@ function frame() {
 
   // hud
   const kmh = state.speed * 3.6 * SPEEDO;
-  const km = state.distance / 1000;
   if (useMph) {
     spdEl.textContent = Math.round(kmh * 0.621371);
-    distEl.textContent = (km * 0.621371).toFixed(2) + ' mi';
   } else {
     spdEl.textContent = Math.round(kmh);
-    distEl.textContent = km.toFixed(2) + ' km';
   }
   spdFill.style.width = (100 * state.speed / state.maxSpeed).toFixed(1) + '%';
 
