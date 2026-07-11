@@ -9,3 +9,6 @@
 // if you're american, the km/h can be swapped by pressing on the dist. or speedometer part of the ui.
 
 // cheers.
+
+<img width="2227" height="1174" alt="wave mode" src="https://github.com/user-attachments/assets/f78301a6-0fff-4269-b452-7766c480ff87" />
+<img width="2231" height="1176" alt="default (foggy) mode" src="https://github.com/user-attachments/assets/f513e145-cdae-41b5-898e-06a796b5d1ef" />
