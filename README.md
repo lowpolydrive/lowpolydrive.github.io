@@ -6,7 +6,7 @@
 
 // control with wasd or the arrow keys on desktop; support is present for mobile as well.
 
-// if you're american, the km/h can be swapped by pressing on the dist. or speedometer part of the ui.
+// if you're american, the km/h can be swapped by pressing on the speedometer part of the ui.
 
 // cheers.
 
