@@ -1,6 +1,6 @@
 // [lowpoly drive](https://lowpolydrive.github.io).
 
-// a semi-endless road game with inspiration from slowroads.
+// an endless road game with inspiration from slowroads.
 
 // has support for soundcloud music. just paste a song in - works with playlists too. 
 
