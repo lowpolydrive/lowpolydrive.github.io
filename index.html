@@ -10,7 +10,7 @@
 <title>lowpoly drive</title>
 <script>
   // bump on publish
-  window.__BUILD = '0.1.1';
+  window.__BUILD = '0.1.2';
   (function () {
     try {
       fetch('version.txt?ts=' + Date.now(), { cache: 'no-store' })
@@ -348,7 +348,7 @@
     body.wave .pod-controls {
       top: calc(58px + env(safe-area-inset-top));
     }
-    /* mobile contrast (forgot to shorten this comment) */
+    /* mobile contrast */
     .btn {
       background: rgba(18, 20, 26, 0.82);
       border-color: rgba(255,255,255,0.28);
@@ -1981,6 +1981,7 @@ const PRESETS = [
 ];
 
 let scWidget = null, scReady = false;
+let scCurIndex = 0, scTotal = 1;
 let loopOne = false;
 let queue = PRESETS.map(p => ({ url: p.url, title: p.title }));
 let queueIdx = -1;
@@ -2061,13 +2062,18 @@ function loadTrack(trackUrl, title) {
         applyVolume();
         scWidget.getDuration(d => { trackDuration = d; mpDur.textContent = fmtTime(d); });
         scWidget.getCurrentSound(s => { if (s && s.title) mpNow.textContent = s.title.toLowerCase(); });
+        scWidget.getCurrentSoundIndex(i => { scCurIndex = i; });
+        scWidget.getSounds(list => { scTotal = (list && list.length) || 1; });
       });
       scWidget.bind(SC.Widget.Events.PAUSE, () => setPlayIcon(false));
       scWidget.bind(SC.Widget.Events.FINISH, () => {
         if (loopOne && scWidget && scReady) {
           scWidget.seekTo(0); resetProgressUI(); scWidget.play(); applyVolume();
-        } else {
-          onTrackEnd();
+          return;
+        }
+        // weird song playlist fix
+        if (scCurIndex >= scTotal - 1) {
+          onPlaylistEnd();
         }
       });
       scWidget.bind(SC.Widget.Events.PLAY_PROGRESS, e => {
@@ -2101,11 +2107,14 @@ function playPrev() {
   if (scWidget && scReady) { scWidget.prev(); scWidget.seekTo(0); resetProgressUI(); applyVolume(); return; }
   if (queue.length) playFromQueue((queueIdx - 1 + queue.length) % queue.length);
 }
-function onTrackEnd() {
+function onPlaylistEnd() {
   if (queueIdx < queue.length - 1) {
     playFromQueue(queueIdx + 1);
   } else {
-    playFromQueue(0);
+    const preset = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+    let i = queue.findIndex(q => q.url === preset.url);
+    if (i < 0) { queue.push({ url: preset.url, title: preset.title }); i = queue.length - 1; }
+    playFromQueue(i);
   }
 }
 
