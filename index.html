@@ -10,7 +10,7 @@
 <title>lowpoly drive</title>
 <script>
   // bump on publish
-  window.__BUILD = '0.1.2';
+  window.__BUILD = '0.2.0';
   (function () {
     try {
       fetch('version.txt?ts=' + Date.now(), { cache: 'no-store' })
@@ -75,8 +75,8 @@
     opacity: 0;
     pointer-events: none;
   }
-  body.idle-hide .wave-badge { opacity: 0; }
-  /* disable blur during idle fade */
+  body.idle-hide .wave-badge, body.idle-hide .autumn-badge, body.idle-hide .snowy-badge { opacity: 0; }
+  /* no blur while fading */
   body.fading .pod, body.fading .wheel, body.fading .pedal, body.fading .steer-btn, body.fading #musicPanel {
     backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
   }
@@ -283,8 +283,8 @@
   .pedal svg { width: 26px; height: 26px; stroke: currentColor; fill: none;
     stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .pedal.gas {
-    background: rgba(223, 227, 232, 0.92);
-    color: #20242b;
+    background: var(--accent);
+    color: #10141a;
     border: none;
   }
   .pedal.brake {
@@ -293,7 +293,7 @@
     border: 1px solid rgba(255,255,255,0.14);
   }
   .pedal.down { transform: scale(0.94); }
-  .pedal.gas.down { background: #fff; }
+  .pedal.gas.down { background: var(--accent); filter: brightness(1.15); }
   .pedal.brake.down { background: rgba(24, 27, 33, 0.8); }
 
   /* steer buttons */
@@ -467,6 +467,20 @@
     background: #ff2fb0; box-shadow: 0 0 10px #ff2fb0;
     animation: loadslide 0.9s ease-in-out infinite;
   }
+  /* autumn loading palette */
+  #transition.autumn { background: #3a2410; }
+  #transition.autumn .trans-title { color: #ffcf7a; text-shadow: 0 0 14px rgba(232,147,74,0.6); }
+  #transition.autumn .track .bar { background: #e8934a; box-shadow: 0 0 10px #e8934a; }
+  /* snowy loading palette */
+  #transition.snowy { background: #cdd8e4; }
+  #transition.snowy .trans-title { color: #3f5064; text-shadow: 0 0 14px rgba(120,150,180,0.4); }
+  #transition.snowy .track { background: rgba(60,80,100,0.2); }
+  #transition.snowy .track .bar { background: #6f97c0; box-shadow: 0 0 10px #6f97c0; }
+  /* slate loading palette */
+  #transition.slate { background: #b7bcc4; }
+  #transition.slate .trans-title { color: #3a3e47; text-shadow: none; }
+  #transition.slate .track { background: rgba(50,55,64,0.25); }
+  #transition.slate .track .bar { background: #5a626e; box-shadow: 0 0 8px rgba(90,98,110,0.6); }
   /* volume slider */
   .audio-wrap { position: relative; display: inline-flex; pointer-events: auto; }
   .vol-pop {
@@ -531,12 +545,13 @@
     box-shadow: 0 0 12px rgba(33,230,255,0.35); }
   body.wave .cluster .speed .value { color: #21e6ff; text-shadow: 0 0 12px rgba(33,230,255,0.5); }
   body.wave .cluster .bar .fill { background: #ff2fb0; box-shadow: 0 0 8px #ff2fb0; }
-  body.wave .steer-btn, body.wave .pedal {
+  body.wave .steer-btn, body.wave .pedal.brake {
     background: rgba(20, 8, 38, 0.5);
     border-color: rgba(255, 47, 176, 0.4);
     color: #ffd0ee;
   }
-  body.wave .steer-btn.down, body.wave .pedal.gas.down { background: rgba(33,230,255,0.35); }
+  body.wave .pedal.gas { background: var(--accent); color: #0a0618; }
+  body.wave .steer-btn.down { background: rgba(33,230,255,0.35); }
   body.wave #volSlider { background: rgba(255,47,176,0.28); }
   body.wave #volSlider::-webkit-slider-thumb { background: #21e6ff; box-shadow: 0 0 8px rgba(33,230,255,0.7); }
   body.wave #volSlider::-moz-range-thumb { background: #21e6ff; box-shadow: 0 0 8px rgba(33,230,255,0.7); }
@@ -570,6 +585,55 @@
   .auto-btn { display: flex; }
   body.wave .auto-btn.on { color: #21e6ff; border-color: rgba(33,230,255,0.7);
     box-shadow: 0 0 12px rgba(33,230,255,0.4); }
+
+  /* autumn ui */
+  .autumn-badge {
+    display: none;
+    position: absolute;
+    left: 50%; top: calc(16px + env(safe-area-inset-top));
+    transform: translateX(-50%);
+    padding: 7px 16px;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: lowercase;
+    color: #ffcf7a;
+    background: rgba(58, 34, 16, 0.55);
+    border: 1px solid rgba(232,147,74,0.5);
+    border-radius: 20px;
+    text-shadow: 0 0 10px rgba(232,147,74,0.6);
+    box-shadow: 0 0 16px rgba(200,90,42,0.25);
+    transition: opacity 0.8s ease;
+    will-change: opacity;
+  }
+  body.autumn .autumn-badge { display: block; }
+  .snowy-badge {
+    display: none;
+    position: absolute;
+    left: 50%; top: calc(16px + env(safe-area-inset-top));
+    transform: translateX(-50%);
+    padding: 7px 16px;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: lowercase;
+    color: #8fbfe6;
+    background: rgba(30, 44, 60, 0.55);
+    border: 1px solid rgba(143,191,230,0.5);
+    border-radius: 20px;
+    text-shadow: 0 0 10px rgba(143,191,230,0.6);
+    box-shadow: 0 0 16px rgba(143,191,230,0.25);
+    transition: opacity 0.8s ease;
+    will-change: opacity;
+  }
+  body.snowy .snowy-badge { display: block; }
+  .autumn-toggle { color: #d8732a; border-color: rgba(216,115,42,0.5); }
+  .autumn-toggle.on { color: #ffcf7a; border-color: rgba(232,147,74,0.7);
+    box-shadow: 0 0 12px rgba(200,90,42,0.4); background: rgba(216,115,42,0.18); }
+  .snowy-toggle.on { color: #8fbfe6; border-color: rgba(143,191,230,0.7);
+    box-shadow: 0 0 12px rgba(143,191,230,0.4); background: rgba(143,191,230,0.16); }
+  body.autumn { --accent: #e8934a; }
+  body.autumn .pod, body.autumn .btn, body.autumn .wheel, body.autumn .pedal, body.autumn .steer-btn {
+    border-color: rgba(232,147,74,0.35);
+  }
+  body.autumn .btn.on { color: #ffcf7a; border-color: rgba(232,147,74,0.7); background: rgba(216,115,42,0.15); }
+  body.autumn #volSlider::-webkit-slider-thumb { background: #e8934a; }
+  body.autumn #volSlider::-moz-range-thumb { background: #e8934a; }
+  body.autumn .cluster .speed .value { color: #ffcf7a; }
 
   /* music panel */
   #musicPanel {
@@ -684,7 +748,9 @@
 </div>
 
 <div class="cluster">
-  <div class="pod wave-badge" id="waveBadge">wave mode</div>
+  <div class="pod wave-badge" id="waveBadge">wave</div>
+  <div class="pod autumn-badge" id="autumnBadge">autumn</div>
+  <div class="pod snowy-badge" id="snowyBadge">snowy</div>
   <div class="pod pod-speed speed unit-toggle" id="speedBlock" data-tip="tap to switch units" data-tip-below>
     <div class="row">
       <span class="value" id="spd">0</span>
@@ -703,11 +769,14 @@
     <button class="btn" id="hillBtn" aria-label="toggle hills" data-tip="hills">
       <svg viewBox="0 0 24 24"><path d="M3 18l5-7 4 5 3-4 6 6"/></svg>
     </button>
-    <button class="btn" id="themeBtn" aria-label="change environment" data-tip="theme">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+    <button class="btn snowy-toggle" id="themeBtn" aria-label="toggle snowy mode" data-tip="snowy">
+      <svg viewBox="0 0 24 24"><path d="M12 3v18M4.5 7.5l15 9M19.5 7.5l-15 9"/></svg>
     </button>
-    <button class="btn wave-toggle" id="waveBtn" aria-label="toggle wave mode" data-tip="wave mode">
+    <button class="btn wave-toggle" id="waveBtn" aria-label="toggle wave mode" data-tip="wave">
       <svg viewBox="0 0 24 24"><path d="M2 13c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/><path d="M2 18c2 0 2-3 4-3s2 3 4 3 2-3 4-3 2 3 4 3 2-3 4-3"/></svg>
+    </button>
+    <button class="btn autumn-toggle" id="autumnBtn" aria-label="toggle autumn" data-tip="autumn">
+      <svg viewBox="0 0 24 24"><path d="M12 22V12M12 12c0-4 2-7 5-8 0 4-1.5 7-5 8zM12 14c0-3-2-5-5-6 0 3 1.5 5 5 6z"/></svg>
     </button>
     <div class="audio-wrap" id="audioWrap">
       <button class="btn" id="audioBtn" aria-label="toggle sound" data-tip="sound">
@@ -825,6 +894,18 @@ const THEMES = {
     chimney: 0x99a3ad, smoke: 0xeef3f8,
     hemiSky: 0xffffff, hemiGround: 0xbcc6d0, hemiInt: 1.05,
     sun: 0xeaf2ff, sunInt: 1.0,
+  },
+  autumn: {
+    name: 'autumn',
+    fog: 0xe8c9a0, fogNear: 65, fogFar: 320,
+    ground: 0x9c7a4d, road: 0x4a4038, roadEdge: 0xb89a68, line: 0xe8d8b0,
+    tree: 0xc85a2a, trunk: 0x5a3d28,
+    car: 0xe0d8c8, carDark: 0x8a8072, glass: 0x2e2a26, breeze: 0xe8934a,
+    house: 0xc8a878, houseDk: 0x9c7a4d, roof: 0x7a4a30, door: 0x4a3626,
+    chimney: 0x8a6a48, smoke: 0xe8dcc8,
+    mtn: 0x8a6242,
+    hemiSky: 0xffe6c0, hemiGround: 0xa8824e, hemiInt: 1.0,
+    sun: 0xffd98a, sunInt: 1.15,
   },
   synthwave: {
     name: 'synthwave',
@@ -997,13 +1078,26 @@ function applyTheme(name) {
   }
   snowGroup.visible = (name === 'snow');
   applyWave(t);
+  if (!waveMode) {
+    const autumnMtn = (name === 'autumn') ? t.mtn : null;
+    for (const mt of mountains) {
+      mt.traverse(o => { if (o.isMesh && o.material && !o.isLineSegments) {
+        const mm = o.material;
+        if (mm.userData.origColor === undefined) mm.userData.origColor = mm.color.getHex();
+        mm.color.setHex(autumnMtn !== null ? autumnMtn : mm.userData.origColor);
+      }});
+    }
+  }
   document.body.classList.toggle('wave', waveMode);
+  document.body.classList.toggle('autumn', name === 'autumn');
+  document.body.classList.toggle('snowy', name === 'snow');
   const fav = document.getElementById('favicon');
-  if (fav) fav.href = waveMode ? FAVICON_WAVE : FAVICON_DEFAULT;
+  if (fav) fav.href = waveMode ? FAVICON_WAVE : (name === 'autumn' ? FAVICON_AUTUMN : FAVICON_DEFAULT);
 }
 
 const FAVICON_DEFAULT = document.getElementById('favicon').href;
 const FAVICON_WAVE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffe9a8'/%3E%3Cstop offset='.5' stop-color='%23ff9ec4'/%3E%3Cstop offset='1' stop-color='%23ff2f9e'/%3E%3C/linearGradient%3E%3CclipPath id='c'%3E%3Ccircle cx='16' cy='13' r='9'/%3E%3C/clipPath%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='%231a0733'/%3E%3Cg clip-path='url(%23c)'%3E%3Crect x='7' y='4' width='18' height='18' fill='url(%23s)'/%3E%3Crect x='7' y='14' width='18' height='1.4' fill='%231a0733'/%3E%3Crect x='7' y='16.5' width='18' height='1.6' fill='%231a0733'/%3E%3Crect x='7' y='19.2' width='18' height='2' fill='%231a0733'/%3E%3C/g%3E%3Cg stroke='%23e64bff' stroke-width='1' opacity='.9'%3E%3Cline x1='0' y1='24' x2='32' y2='24'/%3E%3Cline x1='0' y1='28' x2='32' y2='28'/%3E%3Cline x1='16' y1='23' x2='4' y2='32'/%3E%3Cline x1='16' y1='23' x2='28' y2='32'/%3E%3Cline x1='16' y1='23' x2='16' y2='32'/%3E%3C/g%3E%3C/svg%3E";
+const FAVICON_AUTUMN = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e8c9a0'/%3E%3Cpath d='M0 22 L9 10 L15 18 L21 12 L32 24 L32 32 L0 32 Z' fill='%237a5638'/%3E%3Cpath d='M0 22 L9 10 L13 15 L7 22 Z' fill='%238f6a44' opacity='.7'/%3E%3Cpath d='M13 32 L15 24 L17 24 L19 32 Z' fill='%233a2c1c'/%3E%3Crect x='15.4' y='26' width='1.2' height='1.4' fill='%23e8d8b0'/%3E%3Crect x='15.4' y='29' width='1.2' height='1.6' fill='%23e8d8b0'/%3E%3C/svg%3E";
 
 function applyWave(t) {
   const on = !!t.wave;
@@ -1051,6 +1145,12 @@ function applyWave(t) {
     cl.head.emissiveIntensity = on ? 1.4 : 1;
     cl.tail.emissive.setHex(on ? 0xff2f6a : cl.tailBase);
     cl.tail.emissiveIntensity = on ? 1.2 : 1;
+  }
+  if (window.__carCrates) for (const c of window.__carCrates) c.visible = !on;
+  if (window.__carHub) {
+    window.__carHub.color.setHex(on ? 0xff2f9e : 0xc2c7cf);
+    window.__carHub.emissive.setHex(on ? 0xff2f9e : 0x000000);
+    window.__carHub.emissiveIntensity = on ? 0.6 : 1;
   }
   const distBlock = document.getElementById('distBlock');
   if (distBlock) distBlock.style.display = on ? 'none' : '';
@@ -1366,103 +1466,124 @@ function panel(w, h, color, opts) {
   m.castShadow = true; m.receiveShadow = true;
   return m;
 }
-const paint = { rough: 0.34, metal: 0.22 };
+const paint = { rough: 0.4, metal: 0.15 };
+const S = 1.05;
 
-const bodyLower = box(2.0, 0.5, 4.5, C.car, paint);
-bodyLower.position.y = 0.6;
+// kei truck
+// full-length body
+const bodyLower = box(1.5, 0.46, 3.7, C.car, paint);
+bodyLower.position.set(0, 0.66, 0.0);
 car.add(bodyLower);
-const bodyUpper = box(1.82, 0.34, 4.2, C.car, paint);
-bodyUpper.position.y = 0.94;
-car.add(bodyUpper);
-const chamPanels = [];
-for (const sx of [-1, 1]) {
-  const cham = panel(0.34, 4.2, C.car, paint);
-  cham.position.set(sx*0.95, 0.9, 0);
-  cham.rotation.y = sx*Math.PI/2;
-  cham.rotation.x = 0;
-  cham.rotation.z = sx*0.9;
-  car.add(cham);
-  chamPanels.push(cham);
-}
 
-const hood = box(1.78, 0.22, 1.3, C.car, paint);
-hood.position.set(0, 1.02, 1.55);
-car.add(hood);
-const crease = box(0.06, 0.06, 1.2, C.carDark, { rough: 0.5 });
-crease.position.set(0, 1.15, 1.55);
-car.add(crease);
-const nose = box(1.72, 0.5, 0.5, C.car, paint);
-nose.position.set(0, 0.78, 2.28);
-car.add(nose);
-
-const cabinBase = box(1.66, 0.2, 2.3, C.car, paint);
-cabinBase.position.set(0, 1.2, -0.15);
-car.add(cabinBase);
-const roof = box(1.4, 0.4, 1.9, C.car, paint);
-roof.position.set(0, 1.5, -0.3);
-car.add(roof);
-const roofFront = panel(1.4, 0.7, C.glass, { rough: 0.12, transparent: true, opacity: 0.8 });
-roofFront.position.set(0, 1.42, 0.85);
-roofFront.rotation.x = -0.7;
-car.add(roofFront);
-const roofRear = panel(1.4, 0.7, C.glass, { rough: 0.12, transparent: true, opacity: 0.8 });
-roofRear.position.set(0, 1.42, -1.25);
-roofRear.rotation.x = 0.7;
-car.add(roofRear);
-
-for (const sx of [-1, 1]) {
-  const sideGlass = panel(1.9, 0.5, C.glass, { rough: 0.12, transparent: true, opacity: 0.72 });
-  sideGlass.position.set(sx*0.72, 1.45, -0.25);
-  sideGlass.rotation.y = sx*Math.PI/2;
-  car.add(sideGlass);
-}
-const roofCap = box(1.28, 0.12, 1.7, 0x1c1f25, { rough: 0.15, metal: 0.3 });
-roofCap.position.set(0, 1.72, -0.3);
-car.add(roofCap);
-
-const skirt = box(2.04, 0.2, 4.4, C.carDark, { rough: 0.6 });
-skirt.position.y = 0.34;
+// frame rail
+const skirt = box(1.42, 0.18, 3.5, C.carDark, { rough: 0.6 });
+skirt.position.set(0, 0.46, 0.0);
 car.add(skirt);
 
-const headBar = box(1.5, 0.09, 0.06, 0xf4f7fa, { rough: 0.2, extra: { emissive: 0x445566, emissiveIntensity: 1 } });
-headBar.position.set(0, 0.86, 2.52);
-car.add(headBar);
-const tailBar = box(1.5, 0.09, 0.06, 0x120608, { rough: 0.3, extra: { emissive: 0x7a1519, emissiveIntensity: 1 } });
-tailBar.position.set(0, 0.9, -2.5);
-car.add(tailBar);
-window.__carLights = { head: headBar.material, tail: tailBar.material,
-  headBase: headBar.material.emissive.getHex(), tailBase: tailBar.material.emissive.getHex() };
+// cab
+const cab = box(1.46, 1.16, 1.32, C.car, paint);
+cab.position.set(0, 1.47, 1.02);
+car.add(cab);
 
-const wheelGeo = new THREE.CylinderGeometry(0.52, 0.52, 0.34, 16);
-const wheelMat = mat(0x22252b, { rough: 0.85 });
-const rimMat = mat(0xc2c7cf, { rough: 0.4, metal: 0.5 });
-const hubMat = mat(C.carDark, { rough: 0.5, metal: 0.3 });
+const roof = box(1.4, 0.12, 1.28, C.carDark, { rough: 0.4 });
+roof.position.set(0, 2.11, 1.02);
+car.add(roof);
+
+// windshield
+const windshield = box(1.32, 0.82, 0.06, C.glass, { rough: 0.12 });
+windshield.position.set(0, 1.64, 1.71);
+car.add(windshield);
+
+// tall side windows
+for (const sx of [-1, 1]) {
+  const sw = box(0.06, 0.66, 0.86, C.glass, { rough: 0.12 });
+  sw.position.set(sx*0.78, 1.58, 1.02);
+  car.add(sw);
+}
+
+// nose
+const nose = box(1.5, 0.58, 0.2, C.car, paint);
+nose.position.set(0, 1.12, 1.7);
+car.add(nose);
+
+const bumper = box(1.52, 0.24, 0.22, C.carDark, { rough: 0.6 });
+bumper.position.set(0, 0.66, 1.74);
+car.add(bumper);
+
+// front lights
+const headMat = mat(0xf4f7fa, { rough: 0.2, extra: { emissive: 0x445566, emissiveIntensity: 1 } });
+const amberMat = mat(0xd88a2a, { rough: 0.4, extra: { emissive: 0x5a3a00, emissiveIntensity: 0.5 } });
+for (const sx of [-1, 1]) {
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.2, 0.08), headMat);
+  head.position.set(sx*0.5, 1.02, 1.81);
+  head.castShadow = true;
+  car.add(head);
+  const amber = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.07), amberMat);
+  amber.position.set(sx*0.66, 0.88, 1.8);
+  car.add(amber);
+}
+
+// bed
+const bedFloor = box(1.4, 0.1, 2.1, C.carDark, { rough: 0.6 });
+bedFloor.position.set(0, 0.92, -0.88);
+car.add(bedFloor);
+const bedWalls = [];
+for (const sx of [-1, 1]) {
+  const wall = box(0.12, 0.3, 2.1, C.car, paint);
+  wall.position.set(sx*0.72, 1.05, -0.88);
+  car.add(wall);
+  bedWalls.push(wall);
+}
+const tailgate = box(1.5, 0.3, 0.12, C.car, paint);
+tailgate.position.set(0, 1.05, -1.9);
+car.add(tailgate);
+const headboard = box(1.46, 0.44, 0.12, C.car, paint);
+headboard.position.set(0, 1.12, 0.18);
+car.add(headboard);
+
+// tail lights
+const tailMat = mat(0x120608, { rough: 0.3, extra: { emissive: 0x7a1519, emissiveIntensity: 1 } });
+for (const sx of [-1, 1]) {
+  const tl = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.06), tailMat);
+  tl.position.set(sx*0.54, 0.82, -1.96);
+  car.add(tl);
+}
+window.__carLights = { head: headMat, tail: tailMat,
+  headBase: headMat.emissive.getHex(), tailBase: tailMat.emissive.getHex() };
+
+// bed crates
+const crates = [];
+const crate = box(0.52, 0.4, 0.52, 0x8a5a2e, { rough: 0.9 });
+crate.position.set(-0.18, 1.17, -0.95);
+car.add(crate); crates.push(crate);
+const crate2 = box(0.42, 0.34, 0.42, 0xa06a34, { rough: 0.9 });
+crate2.position.set(0.3, 1.14, -1.15);
+car.add(crate2); crates.push(crate2);
+window.__carCrates = crates;
+
+const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.26, 14);
+const wheelMat = mat(0x1c1a18, { rough: 0.85 });
+const hubMat = new THREE.MeshStandardMaterial({ color: 0xc2c7cf, roughness: 0.4, metalness: 0.5, flatShading: true });
+window.__carHub = hubMat;
 const wheels = [];
-for (const [wx, wz] of [[-1,1.4],[1,1.4],[-1,-1.5],[1,-1.5]]) {
+for (const [wx, wz] of [[-0.72, 1.2], [0.72, 1.2], [-0.72, -1.05], [0.72, -1.05]]) {
   const w = new THREE.Group();
   const spinner = new THREE.Group();
   const tire = new THREE.Mesh(wheelGeo, wheelMat);
   tire.rotation.z = Math.PI/2;
   tire.castShadow = true;
   spinner.add(tire);
-  const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.36, 16), rimMat);
-  rim.rotation.z = Math.PI/2;
-  spinner.add(rim);
-  for (let s = 0; s < 5; s++) {
-    const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.55, 0.05), hubMat);
-    spoke.rotation.z = Math.PI/2;
-    spoke.rotation.x = (s/5) * Math.PI;
-    spinner.add(spoke);
-  }
-  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.4,8), hubMat);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.28, 8), hubMat);
   hub.rotation.z = Math.PI/2;
   spinner.add(hub);
   w.add(spinner);
   w.userData.spinner = spinner;
-  w.position.set(wx * 0.95, 0.5, wz);
+  w.position.set(wx, 0.4, wz);
   car.add(w);
   wheels.push(w);
 }
+
+car.scale.setScalar(S);
 
 const carOutlines = [];
 function addOutline(src, parent, thresh) {
@@ -1475,7 +1596,7 @@ function addOutline(src, parent, thresh) {
   (parent || car).add(ol);
   carOutlines.push(ol);
 }
-for (const src of [bodyLower, bodyUpper, hood, nose, cabinBase, roof, roofCap, skirt, ...chamPanels]) {
+for (const src of [bodyLower, cab, roof, nose, bumper, bedFloor, tailgate, headboard, ...bedWalls]) {
   addOutline(src);
 }
 // wheel outlines
@@ -1912,16 +2033,22 @@ document.getElementById('camBtn').addEventListener('click', () => { camMode = (c
 const transEl = document.getElementById('transition');
 const transTitleEl = document.getElementById('transTitle');
 let transitioning = false;
-let prevTheme = 'slate';
 const waveBtn = document.getElementById('waveBtn');
 
 function switchTheme(next) {
-  const enteringWave = THEMES[next] && THEMES[next].wave;
-  const leavingWave = waveMode;
-  if (enteringWave || leavingWave) {
+  const special = t => THEMES[t] && (THEMES[t].wave || t === 'autumn' || t === 'snow');
+  const entering = special(next);
+  const leaving = special(themeName);
+  if (entering || leaving) {
     if (transitioning) return;
     transitioning = true;
-    transTitleEl.textContent = enteringWave ? 'wave mode' : 'loading...';
+    const isWave = THEMES[next] && THEMES[next].wave;
+    transTitleEl.textContent = isWave ? 'wave'
+      : next === 'autumn' ? 'autumn'
+      : next === 'snow' ? 'snowy'
+      : next === 'slate' ? 'slate' : 'loading...';
+    transEl.classList.remove('autumn', 'snowy', 'slate');
+    if (!isWave) transEl.classList.add(next === 'autumn' ? 'autumn' : next === 'snow' ? 'snowy' : 'slate');
     transEl.classList.add('show');
     setTimeout(() => { applyTheme(next); }, 380);
     setTimeout(() => { transEl.classList.remove('show'); transitioning = false; }, 1100);
@@ -1930,22 +2057,25 @@ function switchTheme(next) {
   }
 }
 
-document.getElementById('themeBtn').addEventListener('click', () => {
-  if (waveMode) return;
-  switchTheme(themeName === 'slate' ? 'snow' : 'slate');
-});
+const snowBtn = document.getElementById('themeBtn');
+const autumnBtn = document.getElementById('autumnBtn');
 
-waveBtn.addEventListener('click', () => {
+// mutually exclusive modes
+function setMode(mode) {
   if (transitioning) return;
-  if (waveMode) {
-    switchTheme(prevTheme);
-    waveBtn.classList.remove('on');
-  } else {
-    prevTheme = themeName;
-    switchTheme('synthwave');
-    waveBtn.classList.add('on');
-  }
-});
+  const themeFor = { snowy: 'snow', autumn: 'autumn', wave: 'synthwave' };
+  const current = waveMode ? 'wave' : themeName === 'snow' ? 'snowy' : themeName === 'autumn' ? 'autumn' : 'slate';
+  const target = (current === mode) ? 'slate' : themeFor[mode];
+  switchTheme(target);
+  const next = (current === mode) ? 'slate' : mode;
+  snowBtn.classList.toggle('on', next === 'snowy');
+  autumnBtn.classList.toggle('on', next === 'autumn');
+  waveBtn.classList.toggle('on', next === 'wave');
+}
+
+snowBtn.addEventListener('click', () => setMode('snowy'));
+autumnBtn.addEventListener('click', () => setMode('autumn'));
+waveBtn.addEventListener('click', () => setMode('wave'));
 
 let autoDrive = false;
 const autoBtn = document.getElementById('autoBtn');
@@ -2496,10 +2626,13 @@ function frame() {
     warpSegment(seg);
   }
   const cullZ = -Infinity;
+  const treeMul = (themeName === 'autumn') ? 1.9 : 1;
   for (const tree of trees) {
     if (waveMode) { tree.visible = false; continue; }
     tree.position.x = curveAt(tree.position.z) + tree.userData.offX;
     tree.position.y = hillAt(tree.position.z);
+    const s = tree.userData.baseScale * treeMul;
+    tree.scale.setScalar(s);
     tree.visible = true;
   }
   for (const mt of mountains) {
