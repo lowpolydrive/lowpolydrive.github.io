@@ -1908,12 +1908,13 @@ function makeIceTexture() {
 }
 const iceTex = makeIceTexture();
 const iceMat = new THREE.MeshBasicMaterial({ map: iceTex, transparent: true, opacity: 0.72, depthWrite: false });
-const ICE_SEG = 22;
+const ICE_SEG = 8;
+const ICE_STEP = 6;
 function edgeOffX(side) {
   const edge = ROAD_W/2 - 0.5;
   return side * (edge - Math.random()*1.6);
 }
-for (let i = 0; i < 40; i++) {
+for (let i = 0; i < 90; i++) {
   const side = (i % 2 === 0) ? -1 : 1;
   const wdt = 3.2 + Math.random()*1.4;
   const len = ICE_SEG;
@@ -1925,8 +1926,8 @@ for (let i = 0; i < 40; i++) {
 }
 let leftZ = -20, rightZ = -20;
 for (const m of icePatches) {
-  if (m.userData.side === -1) { m.position.z = leftZ; leftZ -= ICE_SEG; }
-  else { m.position.z = rightZ; rightZ -= ICE_SEG; }
+  if (m.userData.side === -1) { m.position.z = leftZ; leftZ -= ICE_STEP; }
+  else { m.position.z = rightZ; rightZ -= ICE_STEP; }
 }
 
 // autumn leaves
@@ -2776,7 +2777,7 @@ function frame() {
         let far = state.worldZ;
         for (const o of icePatches) if (o.userData.side === m.userData.side) far = Math.min(far, o.position.z);
         m.userData.offX = edgeOffX(m.userData.side);
-        m.position.z = far - ICE_SEG;
+        m.position.z = far - ICE_STEP;
       }
       m.position.x = curveAt(m.position.z) + m.userData.offX;
       m.position.y = hillAt(m.position.z) + 0.06;
