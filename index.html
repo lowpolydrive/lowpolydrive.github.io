@@ -10,7 +10,7 @@
 <title>lowpoly drive</title>
 <script>
   // bump on publish
-  window.__BUILD = '0.2.1';
+  window.__BUILD = '0.2.2';
   (function () {
     try {
       fetch('version.txt?ts=' + Date.now(), { cache: 'no-store' })
@@ -1078,6 +1078,8 @@ function applyTheme(name) {
     }
   }
   snowGroup.visible = (name === 'snow');
+  iceGroup.visible = (name === 'snow');
+  leafGroup.visible = (name === 'autumn');
   applyWave(t);
   if (!waveMode) {
     const autumnMtn = (name === 'autumn') ? t.mtn : null;
@@ -1875,6 +1877,99 @@ const snowPoints = new THREE.Points(snowGeo, snowMat);
 snowPoints.frustumCulled = false;
 snowGroup.add(snowPoints);
 
+// ice patches
+const iceGroup = new THREE.Group();
+iceGroup.visible = false;
+scene.add(iceGroup);
+const icePatches = [];
+function makeIceTexture() {
+  const w = 16, h = 48;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  for (let py = 0; py < h; py++) {
+    for (let px = 0; px < w; px++) {
+      // fade at edges
+      const ex = 1 - Math.abs((px + 0.5) / w - 0.5) * 2;
+      const edgeFade = Math.min(1, ex * 2.2);
+      const n = Math.random();
+      let a = (0.5 + n * 0.4) * edgeFade;
+      if (n < 0.15) a *= 0.45;
+      const v = 224 + Math.floor(Math.random() * 26);
+      x.fillStyle = 'rgba(' + v + ',' + (v + 6) + ',255,' + a.toFixed(3) + ')';
+      x.fillRect(px, py, 1, 1);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  return tex;
+}
+const iceTex = makeIceTexture();
+const iceMat = new THREE.MeshBasicMaterial({ map: iceTex, transparent: true, opacity: 0.72, depthWrite: false });
+const ICE_SEG = 22;
+function edgeOffX(side) {
+  const edge = ROAD_W/2 - 0.5;
+  return side * (edge - Math.random()*1.6);
+}
+for (let i = 0; i < 40; i++) {
+  const side = (i % 2 === 0) ? -1 : 1;
+  const wdt = 3.2 + Math.random()*1.4;
+  const len = ICE_SEG;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, len), iceMat);
+  m.rotation.x = -Math.PI/2;
+  m.userData = { halfW: wdt/2, halfL: len/2, offX: edgeOffX(side), side };
+  iceGroup.add(m);
+  icePatches.push(m);
+}
+let leftZ = -20, rightZ = -20;
+for (const m of icePatches) {
+  if (m.userData.side === -1) { m.position.z = leftZ; leftZ -= ICE_SEG; }
+  else { m.position.z = rightZ; rightZ -= ICE_SEG; }
+}
+
+// autumn leaves
+const leafGroup = new THREE.Group();
+leafGroup.visible = false;
+scene.add(leafGroup);
+const LEAF_N = 130;
+const leaves = [];
+const leafColors = [0xe85a1a, 0xff9420, 0xd42a10, 0xffb830, 0xc84010, 0xe8721a];
+for (let i = 0; i < LEAF_N; i++) {
+  const sz = 0.55 + Math.random()*0.35;
+  const g = new THREE.PlaneGeometry(sz, sz*0.72);
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+    color: leafColors[i % leafColors.length], side: THREE.DoubleSide,
+  }));
+  m.userData = {
+    fall: 2 + Math.random()*2.5, drift: (Math.random()-0.5)*4,
+    spin: (Math.random()-0.5)*3, phase: Math.random()*Math.PI*2,
+  };
+  leafGroup.add(m);
+  leaves.push(m);
+}
+function placeLeaf(m, aroundZ) {
+  const candidates = trees.filter(tr => {
+    const rz = tr.position.z - aroundZ;
+    return rz < 30 && rz > -120;
+  });
+  if (candidates.length) {
+    const tr = candidates[(Math.random()*candidates.length)|0];
+    const canopy = 5 * (tr.userData.baseScale || 1) * ((themeName === 'autumn') ? 1.9 : 1);
+    m.position.set(
+      tr.position.x + (Math.random()-0.5)*3,
+      tr.position.y + canopy*0.5 + Math.random()*canopy*0.4,
+      tr.position.z + (Math.random()-0.5)*3
+    );
+  } else {
+    const sideX = (Math.random() < 0.5 ? -1 : 1) * (ROAD_W/2 + 6 + Math.random()*20);
+    const z = aroundZ - 40 - Math.random()*70;
+    m.position.set(curveAt(z) + sideX, hillAt(z) + 6 + Math.random()*5, z);
+  }
+}
+for (const l of leaves) placeLeaf(l, car.position.z);
+
 // input
 const keys = {};
 addEventListener('keydown', e => {
@@ -2383,6 +2478,21 @@ function bindSteer(id, setDown) {
 bindSteer('steerLeft',  v => btnLeftDown = v);
 bindSteer('steerRight', v => btnRightDown = v);
 
+function clearInputs() {
+  for (const k in keys) keys[k] = false;
+  touchThrottle = false; touchBrake = false; touchSteer = 0;
+  btnSteer = 0; btnLeftDown = btnRightDown = false;
+  const wi = document.getElementById('wheelInner');
+  if (wi) wi.style.transform = 'rotate(0deg)';
+  document.getElementById('steerLeft').classList.remove('down');
+  document.getElementById('steerRight').classList.remove('down');
+  document.getElementById('gasPedal').classList.remove('down');
+  document.getElementById('brakePedal').classList.remove('down');
+}
+addEventListener('blur', clearInputs);
+addEventListener('contextmenu', clearInputs);
+document.addEventListener('visibilitychange', () => { if (document.hidden) clearInputs(); });
+
 ctrlBtn.addEventListener('click', () => {
   buttonMode = !buttonMode;
   ctrlBtn.classList.toggle('on', !buttonMode);
@@ -2602,9 +2712,10 @@ function frame() {
   // driving
   if (phase !== 'parking') {
   const rollFactor = Math.min(1, state.speed / 10);
+  const grip = state.onIce ? 0.25 : 1;
   state.steer += (steerInput - state.steer) * Math.min(1, dt*7);
   const steerRate = 1.5 * (1 - 0.4*Math.min(1, state.speed/state.maxSpeed));
-  state.heading += state.steer * steerRate * rollFactor * dt;
+  state.heading += state.steer * steerRate * rollFactor * grip * dt;
   state.heading = Math.max(-0.9, Math.min(0.9, state.heading));
 
   const move = state.speed * dt;
@@ -2614,6 +2725,12 @@ function frame() {
 
   const centerX = curveAt(state.worldZ);
   state.x = state.carX - centerX;
+
+  let onGrass = false;
+  if (!waveMode && phase === 'driving') {
+    onGrass = Math.abs(state.x) > ROAD_W/2;
+    if (onGrass) state.speed *= (1 - 1.1 * dt);
+  }
 
   const edge = ROAD_W/2 + 8;
   if (state.x > edge)  { state.carX -= (state.x - edge) * 0.6 * dt; }
@@ -2652,6 +2769,27 @@ function frame() {
     tree.scale.setScalar(s);
     tree.visible = true;
   }
+  let onIce = false;
+  if (iceGroup.visible) {
+    for (const m of icePatches) {
+      if (m.position.z - m.userData.halfL > state.worldZ + 40) {
+        let far = state.worldZ;
+        for (const o of icePatches) if (o.userData.side === m.userData.side) far = Math.min(far, o.position.z);
+        m.userData.offX = edgeOffX(m.userData.side);
+        m.position.z = far - ICE_SEG;
+      }
+      m.position.x = curveAt(m.position.z) + m.userData.offX;
+      m.position.y = hillAt(m.position.z) + 0.06;
+      const pitch = Math.atan(hillSlopeAt(m.position.z));
+      const yaw = Math.atan(curveSlopeAt(m.position.z));
+      m.rotation.order = 'YXZ';
+      m.rotation.set(-Math.PI/2 + pitch, 0, -yaw);
+      const dz = Math.abs(m.position.z - state.worldZ);
+      const dx = Math.abs(m.position.x - state.carX);
+      if (dz < m.userData.halfL && dx < m.userData.halfW) onIce = true;
+    }
+  }
+  state.onIce = onIce;
   for (const mt of mountains) {
     const mz = mt.position.z;
     const vis = mz > cullZ;
@@ -2749,6 +2887,19 @@ function frame() {
       else if (relZ < -160) arr[i*3+2] += 220;
     }
     snowGeo.attributes.position.needsUpdate = true;
+  }
+
+  if (leafGroup.visible) {
+    const cz = state.worldZ, cy = hillAt(cz);
+    for (const m of leaves) {
+      const d = m.userData;
+      m.position.y -= d.fall * dt;
+      m.position.x += (d.drift + Math.sin(t*1.2 + d.phase)*2) * dt;
+      m.rotation.z += d.spin * dt;
+      m.rotation.x += d.spin * 0.5 * dt;
+      const relZ = m.position.z - cz;
+      if (m.position.y < cy - 1 || relZ > 45 || relZ < -130) placeLeaf(m, cz);
+    }
   }
 
   if (waveMode) {
