@@ -1,4 +1,4 @@
-a personal page for me, and a my lil game.
+a personal page for me, and my lil game.
 
 <details>
 <summary>// click for game details</summary>
