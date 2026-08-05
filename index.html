@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>:3</title>
+<meta name="description" content="hello! i literally don't know what to put here but ill do something meaningful sometime! :>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cstyle%3Etext%7Bfill:%235B84B1%7D%40media%28prefers-color-scheme:dark%29%7Btext%7Bfill:%239DB8DA%7D%7D%3C/style%3E%3Ctext%20x='16'%20y='22.6'%20text-anchor='middle'%20font-family='ui-monospace%2CSFMono-Regular%2CMenlo%2CConsolas%2Cmonospace'%20font-size='19'%20font-weight='500'%3E:3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wire-h:250;
+  --accent-h:250;
+
+  --void:#000000;
+  --line:oklch(0.74 0.045 var(--wire-h));
+  --line-dim:oklch(0.33 0.035 var(--wire-h));
+  --text:oklch(0.92 0.022 var(--wire-h));
+  --vertex:oklch(0.72 0.15 var(--accent-h));
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:var(--void);
+  color:var(--text);
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:15px;
+  line-height:1.9;
+  overflow:hidden;
+}
+
+.scene{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  perspective:1100px;
+}
+
+.rig{
+  width:min(460px,100%);
+  transform-style:preserve-3d;
+  transition:transform .35s cubic-bezier(.2,.8,.3,1);
+  will-change:transform;
+}
+
+.card{
+  position:relative;
+  width:100%;
+  padding:44px 40px 40px;
+  border:1px solid var(--line);
+  transform-style:preserve-3d;
+  background:
+    radial-gradient(circle 3px at 0 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 3px at 100% 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 3px at 100% 100%,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 3px at 0 100%,var(--vertex) 99%,transparent 100%),
+    linear-gradient(to bottom right,transparent calc(50% - 0.5px),var(--line-dim) calc(50% - 0.5px),var(--line-dim) calc(50% + 0.5px),transparent calc(50% + 0.5px));
+}
+
+.backface{
+  position:absolute;
+  inset:0;
+  border:1px solid var(--line-dim);
+  transform:translateZ(-60px);
+  pointer-events:none;
+}
+
+.wire{
+  border:1px solid var(--line);
+  background-image:
+    radial-gradient(circle 2.5px at 0 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2.5px at 100% 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2.5px at 100% 100%,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2.5px at 0 100%,var(--vertex) 99%,transparent 100%);
+}
+
+.name{
+  display:inline-block;
+  padding:2px 16px 6px;
+  font-size:26px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  margin-bottom:30px;
+  transform:translateZ(24px);
+}
+
+.bio{padding:16px 18px;margin-bottom:34px;transform:translateZ(12px)}
+
+.links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  transform:translateZ(18px);
+}
+
+.links a{
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  font-size:12px;
+  letter-spacing:0.08em;
+  color:var(--line);
+  text-decoration:none;
+  transition:color .18s ease,border-color .18s ease;
+}
+.links a:hover,.links a:focus-visible{color:var(--vertex);border-color:var(--vertex)}
+.links a:focus-visible{outline:1px solid var(--vertex);outline-offset:4px}
+
+.play{flex:1 1 auto}
+.play .arrow{margin-left:auto;padding-left:14px}
+
+.gizmo{
+  position:fixed;
+  left:22px;
+  bottom:20px;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  font-size:10px;
+  letter-spacing:0.1em;
+  color:var(--line-dim);
+  z-index:5;
+}
+
+.ctl{display:flex;align-items:center;gap:10px}
+.ctl .lbl{width:44px;flex-shrink:0}
+.ctl output{color:var(--line-dim);white-space:nowrap}
+
+.ctl input[type=range]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:104px;
+  height:16px;
+  background:transparent;
+  cursor:ew-resize;
+}
+.ctl input[type=range]:focus{outline:none}
+.ctl input[type=range]:focus-visible::-webkit-slider-runnable-track{border-color:var(--vertex)}
+.ctl input[type=range]:focus-visible::-moz-range-track{border-color:var(--vertex)}
+
+.ctl input[type=range]::-webkit-slider-runnable-track{
+  height:14px;
+  border:1px solid var(--line);
+  background-image:
+    radial-gradient(circle 2px at 0 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 100% 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 100% 100%,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 0 100%,var(--vertex) 99%,transparent 100%);
+}
+.ctl input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:7px;
+  height:24px;
+  margin-top:-5px;
+  background:var(--void);
+  border:1px solid var(--vertex);
+}
+.ctl input[type=range]::-moz-range-track{
+  height:14px;
+  border:1px solid var(--line);
+  background-image:
+    radial-gradient(circle 2px at 0 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 100% 0,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 100% 100%,var(--vertex) 99%,transparent 100%),
+    radial-gradient(circle 2px at 0 100%,var(--vertex) 99%,transparent 100%);
+}
+.ctl input[type=range]::-moz-range-thumb{
+  width:7px;
+  height:24px;
+  border-radius:0;
+  background:var(--void);
+  border:1px solid var(--vertex);
+}
+
+.card>*{animation:draw .5s ease both}
+.name{animation-delay:.05s}
+.bio{animation-delay:.15s}
+.links{animation-delay:.25s}
+@keyframes draw{from{opacity:0}to{opacity:1}}
+
+@media (max-width:560px){
+  body{font-size:14px}
+  .card{padding:34px 26px 30px}
+  .name{font-size:22px}
+  .backface{transform:translateZ(-34px)}
+  .gizmo{left:16px;bottom:14px}
+  .ctl output{display:none}
+  .ctl input[type=range]{width:88px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .card>*{animation:none}
+  .rig{transition:none}
+}
+</style>
+</head>
+<body>
+
+<main class="scene">
+  <div class="rig">
+    <div class="card">
+      <div class="backface" aria-hidden="true"></div>
+
+      <h1 class="wire name">:3</h1>
+
+      <div class="wire bio">
+        <p>hello! i literally don't know what to put here but ill do something meaningful sometime! :&gt;</p>
+      </div>
+
+      <nav class="links">
+        <a class="wire" href="https://discord.gg/czMBZYxS" target="_blank" rel="noopener">discord</a>
+
+        <a class="wire" href="https://github.com/lowpolydrive" target="_blank" rel="noopener">github</a>
+
+        <a class="wire play" href="/drive/">
+          <span>lowpoly drive</span>
+          <span class="arrow" aria-hidden="true">-&gt;</span>
+        </a>
+      </nav>
+    </div>
+  </div>
+</main>
+
+<div class="gizmo">
+  <label class="ctl">
+    <span class="lbl">accent</span>
+    <input type="range" id="accent" min="0" max="360" step="1" value="250" aria-label="Accent hue">
+    <output id="accent-out">oklch(0.72 0.15 250)</output>
+  </label>
+  <label class="ctl">
+    <span class="lbl">wire</span>
+    <input type="range" id="wire" min="0" max="360" step="1" value="250" aria-label="Wireframe hue">
+    <output id="wire-out">oklch(0.74 0.045 250)</output>
+  </label>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var rig=document.querySelector('.rig');
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if(!reduce){
+    var frame=null;
+    window.addEventListener('pointermove',function(e){
+      if(frame)return;
+      frame=requestAnimationFrame(function(){
+        frame=null;
+        var x=e.clientX/window.innerWidth-0.5;
+        var y=e.clientY/window.innerHeight-0.5;
+        rig.style.transform='rotateY('+(x*16).toFixed(2)+'deg) rotateX('+(-y*11).toFixed(2)+'deg)';
+      });
+    });
+    document.addEventListener('mouseleave',function(){rig.style.transform='';});
+  }
+
+  function bind(id,prop,chroma,light){
+    var input=document.getElementById(id);
+    var out=document.getElementById(id+'-out');
+    input.addEventListener('input',function(){
+      var h=Math.round(input.value);
+      root.style.setProperty(prop,String(h));
+      out.textContent='oklch('+light+' '+chroma+' '+h+')';
+    });
+  }
+
+  bind('accent','--accent-h','0.15','0.72');
+  bind('wire','--wire-h','0.045','0.74');
+})();
+</script>
+
+</body>
+</html>
