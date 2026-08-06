@@ -903,13 +903,13 @@ const THEMES = {
   },
   snow: {
     name: 'snow',
-    fog: 0xdfe6ee, fogNear: 55, fogFar: 300,
-    ground: 0xeef3f8, road: 0x5a626e, roadEdge: 0xcfd8e2, line: 0xf4f8fc,
+    fog: 0xf0f4f9, fogNear: 55, fogFar: 300,
+    ground: 0xfbfdff, road: 0x5a626e, roadEdge: 0xeef4fa, line: 0xf8fbff,
     tree: 0x6f7b84, trunk: 0x4a4640,
     car: 0xd8e4ee, carDark: 0x7f8894, glass: 0x2b3440, breeze: 0xffffff,
     house: 0xdfe6ee, houseDk: 0xa7b2bd, roof: 0x7c8792, door: 0x455060,
     chimney: 0x99a3ad, smoke: 0xeef3f8,
-    hemiSky: 0xffffff, hemiGround: 0xbcc6d0, hemiInt: 1.05,
+    hemiSky: 0xffffff, hemiGround: 0xeaf0f6, hemiInt: 1.15,
     sun: 0xeaf2ff, sunInt: 1.0,
   },
   autumn: {
@@ -1095,6 +1095,7 @@ function applyTheme(name) {
   }
   snowGroup.visible = (name === 'snow');
   iceGroup.visible = (name === 'snow');
+  if (name === 'snow') layIceBands(state.worldZ);
   leafGroup.visible = (name === 'autumn');
   applyWave(t);
   if (!waveMode) {
@@ -1923,14 +1924,14 @@ function makeIceTexture() {
   return tex;
 }
 const iceTex = makeIceTexture();
-const iceMat = new THREE.MeshBasicMaterial({ map: iceTex, transparent: true, opacity: 0.72, depthWrite: false });
+const iceMat = new THREE.MeshBasicMaterial({ map: iceTex, transparent: true, opacity: 0.9, depthWrite: false });
 const ICE_SEG = 8;
 const ICE_STEP = 6;
 function edgeOffX(side) {
   const edge = ROAD_W/2 - 0.5;
   return side * (edge - Math.random()*1.6);
 }
-for (let i = 0; i < 90; i++) {
+for (let i = 0; i < 130; i++) {
   const side = (i % 2 === 0) ? -1 : 1;
   const wdt = 3.2 + Math.random()*1.4;
   const len = ICE_SEG;
@@ -1940,11 +1941,16 @@ for (let i = 0; i < 90; i++) {
   iceGroup.add(m);
   icePatches.push(m);
 }
-let leftZ = -20, rightZ = -20;
-for (const m of icePatches) {
-  if (m.userData.side === -1) { m.position.z = leftZ; leftZ -= ICE_STEP; }
-  else { m.position.z = rightZ; rightZ -= ICE_STEP; }
+function layIceBands(wz) {
+  // weird toggle render fix
+  let leftZ = wz + 30, rightZ = wz + 30;
+  for (const m of icePatches) {
+    m.userData.offX = edgeOffX(m.userData.side);
+    if (m.userData.side === -1) { m.position.z = leftZ; leftZ -= ICE_STEP; }
+    else { m.position.z = rightZ; rightZ -= ICE_STEP; }
+  }
 }
+layIceBands(0);
 
 // autumn leaves
 const leafGroup = new THREE.Group();
