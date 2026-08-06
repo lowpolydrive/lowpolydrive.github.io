@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>:3</title>
 <meta name="description" content="hello! i literally don't know what to put here but i'll do something meaningful sometime! :>">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cstyle%3Etext%7Bfill:%235B84B1%7D%40media%28prefers-color-scheme:dark%29%7Btext%7Bfill:%239DB8DA%7D%7D%3C/style%3E%3Ctext%20x='16'%20y='22.6'%20text-anchor='middle'%20font-family='ui-monospace%2CSFMono-Regular%2CMenlo%2CConsolas%2Cmonospace'%20font-size='19'%20font-weight='500'%3E:3%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cstyle%3Etext%7Bfill:%233F8F80%7D%40media%28prefers-color-scheme:dark%29%7Btext%7Bfill:%237FCFBE%7D%7D%3C/style%3E%3Ctext%20x='16'%20y='22.6'%20text-anchor='middle'%20font-family='ui-monospace%2CSFMono-Regular%2CMenlo%2CConsolas%2Cmonospace'%20font-size='19'%20font-weight='500'%3E:3%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --wire-h:250;
-  --accent-h:250;
+  --wire-h:185;
+  --accent-h:150;
 
   --void:#000000;
   --line:oklch(0.74 0.045 var(--wire-h));
@@ -78,15 +78,27 @@ body{
     radial-gradient(circle 2.5px at 0 100%,var(--vertex) 99%,transparent 100%);
 }
 
-.name{
-  display:inline-block;
-  padding:2px 16px 6px;
-  font-size:26px;
-  font-weight:500;
-  letter-spacing:0.04em;
+.head{
+  display:flex;
+  align-items:center;
+  gap:10px;
   margin-bottom:30px;
   transform:translateZ(24px);
 }
+
+.avatar{line-height:0;flex-shrink:0}
+.avatar img{width:60px;height:60px;display:block}
+
+.tag{
+  display:flex;
+  align-items:center;
+  height:38px;
+  padding:0 15px;
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0.06em;
+}
+.tag .pro{color:var(--line);margin-left:9px;font-weight:400}
 
 .bio{padding:16px 18px;margin-bottom:34px;transform:translateZ(12px)}
 
@@ -191,7 +203,7 @@ body{
 .tilt[hidden]{display:none}
 
 .card>*{animation:draw .5s ease both}
-.name{animation-delay:.05s}
+.head{animation-delay:.05s}
 .bio{animation-delay:.15s}
 .links{animation-delay:.25s}
 @keyframes draw{from{opacity:0}to{opacity:1}}
@@ -300,7 +312,8 @@ body{
   body{font-size:14px}
   .scene{padding-left:16px;padding-right:16px}
   .card{padding:30px 20px 26px}
-  .name{font-size:22px}
+  .avatar img{width:50px;height:50px}
+  .tag{height:32px;font-size:12px;padding:0 12px}
   .links{flex-wrap:nowrap;gap:2.4vw}
   .links a{
     font-size:clamp(8px,2.7vw,12px);
@@ -330,7 +343,10 @@ body{
     <div class="card">
       <div class="backface" aria-hidden="true"></div>
 
-      <h1 class="wire name">:3</h1>
+      <h1 class="head">
+        <span class="wire avatar"><img src="kitty.webp" width="60" height="60" alt="" decoding="async"></span>
+        <span class="wire tag">cutekibby<span class="pro">any</span></span>
+      </h1>
 
       <div class="wire bio">
         <p>hello! i literally don't know what to put here but i'll do something meaningful sometime! :&gt;</p>
@@ -353,13 +369,13 @@ body{
 <div class="gizmo">
   <label class="ctl">
     <span class="lbl">accent</span>
-    <span class="bar wire"><input class="scrub" type="range" id="accent" min="0" max="360" step="1" value="250" aria-label="Accent hue"></span>
-    <output id="accent-out">oklch(0.72 0.15 250)</output>
+    <span class="bar wire"><input class="scrub" type="range" id="accent" min="0" max="360" step="1" value="150" aria-label="Accent hue"></span>
+    <output id="accent-out">oklch(0.72 0.15 150)</output>
   </label>
   <label class="ctl">
     <span class="lbl">wire</span>
-    <span class="bar wire"><input class="scrub" type="range" id="wire" min="0" max="360" step="1" value="250" aria-label="Wireframe hue"></span>
-    <output id="wire-out">oklch(0.74 0.045 250)</output>
+    <span class="bar wire"><input class="scrub" type="range" id="wire" min="0" max="360" step="1" value="185" aria-label="Wireframe hue"></span>
+    <output id="wire-out">oklch(0.74 0.045 185)</output>
   </label>
   <button class="wire tilt" id="tilt" type="button" hidden>enable tilt</button>
 </div>
@@ -437,8 +453,8 @@ body{
   if(wantsGyro&&!needsPerm)startGyro();
   if(needsPerm)btn.addEventListener('click',askGyro);
 
-  var STORE='lpd.hues';
-  var hues={accent:250,wire:250};
+  var STORE='lpd.hues.2';
+  var hues={accent:150,wire:185};
 
   try{
     var saved=JSON.parse(localStorage.getItem(STORE)||'null');
